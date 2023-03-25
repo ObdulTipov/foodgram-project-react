@@ -1,7 +1,6 @@
 from django.db import models
-from django.contrib.auth import get_user_model
+from users.models import User
 
-User = get_user_model()
 
 FIRST_TEXT_SYM = 15
 
@@ -9,21 +8,17 @@ FIRST_TEXT_SYM = 15
 class Ingredient(models.Model):
     name = models.TextField(
         verbose_name='Название',
-        help_text='Введите название ингридиента',
         max_length=200,
-        blank=True,
     )
-    amount = models.PositiveSmallIntegerField(blank=True,)
     unit = models.TextField(
         verbose_name='Единица измерения',
         max_length=200,
-        blank=True,
     )
 
     class Meta:
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
-        ordering = ['name']
+        ordering = ('name',)
 
     def __str__(self):
         return self.name[:FIRST_TEXT_SYM]
@@ -43,22 +38,26 @@ class Tag(models.Model):
     ]
     name = models.TextField(
         verbose_name='Название',
-        help_text='Введите название ингридиента',
+        max_length=200,
+        unique=True,
+    )
+    color = models.CharField(
+        verbose_name='Цвет',
+        max_length=7,
+        choices=COLOR_PALETTE,
+        default='#A9A9A9',
+    )
+    slug = models.SlugField(
         max_length=200,
         unique=True,
         blank=True,
+        null=True,
     )
-    color = models.CharField(
-        choices=COLOR_PALETTE,
-        default='#A9A9A9',
-        blank=True,
-    )
-    slug = models.SlugField(max_length=200, unique=True, blank=True,)
 
     class Meta:
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
-        ordering = ['name']
+        ordering = ('name',)
 
     def __str__(self):
         return self.name[:FIRST_TEXT_SYM]
@@ -74,22 +73,19 @@ class Recipe(models.Model):
     name = models.TextField(
         verbose_name='Название',
         max_length=200,
-        help_text='Введите название рецепта',
     )
     image = models.ImageField(
-        verbose_name='Картинка',
+        verbose_name='Изображение',
         upload_to='recipes/images/',
-        help_text='Изображение готового блюда',
     )
     text = models.TextField(
         verbose_name='Описание рецепта',
-        help_text='Введите описание рецепта',
     )
     ingredients = models.ManyToManyField(
         Ingredient,
         related_name='recipes',
         verbose_name='Ингредиенты',
-        # through='Ingredient',
+        through='IngredientRecipe',
     )
     tags = models.ManyToManyField(
         Tag,
@@ -108,10 +104,36 @@ class Recipe(models.Model):
     class Meta:
         verbose_name = 'Пост'
         verbose_name_plural = 'Посты'
-        ordering = ['-pub_date']
+        ordering = ('-pub_date',)
 
     def __str__(self) -> str:
         return self.name[:FIRST_TEXT_SYM]
+
+
+class IngredientRecipe(models.Model):
+    ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.CASCADE,
+        related_name='ingredients',
+        verbose_name='Ингридиент',
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='recipes',
+        verbose_name='Рецепт',
+    )
+    amount = models.PositiveSmallIntegerField(
+        verbose_name='Количество',
+    )
+
+    class Meta:
+        verbose_name = 'Ингридиент рецепта'
+        verbose_name_plural = 'Ингридиены рецепта'
+        ordering = ('recipe',)
+
+    def __str__(self):
+        return f'{self.ingredient} - {self.amount} {self.ingredient.unit}'
 
 
 class Follow(models.Model):
@@ -131,7 +153,10 @@ class Follow(models.Model):
     class Meta:
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
-        ordering = ['user']
+        ordering = ('user',)
+
+    def __str__(self):
+        return f'{self.user} подписан на {self.author}'
 
 
 class Favorite(models.Model):
@@ -151,7 +176,10 @@ class Favorite(models.Model):
     class Meta:
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
-        ordering = ['user']
+        ordering = ('user',)
+
+    def __str__(self):
+        return self.recipe
 
 
 class ShoppingList(models.Model):
@@ -172,3 +200,6 @@ class ShoppingList(models.Model):
         verbose_name = 'Список покупок по рецепту'
         verbose_name_plural = 'Списоки покупок по рецептам'
         ordering = ['user']
+
+    def __str__(self):
+        return f'Список покупок рецепта {self.recipe}'

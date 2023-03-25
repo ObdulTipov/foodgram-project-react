@@ -1,6 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-# from reviews.validators import validate_username
+from api.validators import validate_username
 
 
 class User(AbstractUser):
@@ -14,7 +14,7 @@ class User(AbstractUser):
     username = models.CharField(
         max_length=150,
         unique=True,
-        # validators=(validate_username,),
+        validators=(validate_username,),
         null=False
     )
     email = models.EmailField(
