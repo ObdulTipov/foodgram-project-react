@@ -1,4 +1,6 @@
 from django.db import models
+from django.core.validators import MinValueValidator
+
 from users.models import User
 
 
@@ -102,8 +104,8 @@ class Recipe(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Пост'
-        verbose_name_plural = 'Посты'
+        verbose_name = 'Рецепт'
+        verbose_name_plural = 'Рецепты'
         ordering = ('-pub_date',)
 
     def __str__(self) -> str:
@@ -125,6 +127,7 @@ class IngredientRecipe(models.Model):
     )
     amount = models.PositiveSmallIntegerField(
         verbose_name='Количество',
+        validators=(MinValueValidator(1),)
     )
 
     class Meta:
