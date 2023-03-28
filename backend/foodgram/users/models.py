@@ -1,44 +1,32 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from api.validators import validate_username
 
 
 class User(AbstractUser):
+    REQUIRED_FIELDS = ('first_name', 'last_name', 'username',)
+    USERNAME_FIELD = 'email'
     ADMIN = 'admin'
     USER = 'user'
     USER_ROLES = (
-        (ADMIN, 'Admin role'),
-        (USER, 'User role'),
+        (USER, USER),
+        (ADMIN, ADMIN),
     )
 
-    username = models.CharField(
-        max_length=150,
-        unique=True,
-        validators=(validate_username,),
-        null=False
+    email = models.EmailField(max_length=254, unique=True, blank=False)
+    role = models.CharField(max_length=10, choices=USER_ROLES, default=USER)
+    bio = models.TextField(blank=True)
+    confirmation_code = models.CharField(
+        max_length=255, blank=True, null=True
     )
-    email = models.EmailField(
-        max_length=254,
-        unique=True,
-        null=False)
-    role = models.CharField(
-        max_length=10,
-        choices=USER_ROLES,
-        default='user',
-    )
-    bio = models.TextField(
-        'Биография',
-        blank=True,
-    )
-
-    class Meta:
-        verbose_name = 'пользователь'
-        verbose_name_plural = 'Пользователи'
-        ordering = ['username']
 
     @property
     def is_admin(self):
         return self.role == self.ADMIN or self.is_superuser
+
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+        ordering = ('username',)
 
     def __str__(self):
         return self.username

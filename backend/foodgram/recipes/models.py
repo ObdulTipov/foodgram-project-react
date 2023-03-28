@@ -12,7 +12,7 @@ class Ingredient(models.Model):
         verbose_name='Название',
         max_length=200,
     )
-    unit = models.TextField(
+    measurement_unit = models.TextField(
         verbose_name='Единица измерения',
         max_length=200,
     )
@@ -136,7 +136,8 @@ class IngredientRecipe(models.Model):
         ordering = ('recipe',)
 
     def __str__(self):
-        return f'{self.ingredient} - {self.amount} {self.ingredient.unit}'
+        return (f'{self.ingredient} - {self.amount} '
+                f'{self.ingredient.measurement_unit}')
 
 
 class Follow(models.Model):

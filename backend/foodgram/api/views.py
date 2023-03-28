@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from djoser.views import UserViewSet
 from rest_framework import viewsets, status
 from rest_framework.generics import CreateAPIView
 from rest_framework.filters import SearchFilter
@@ -17,12 +18,74 @@ from recipes.models import (Ingredient, Tag, Recipe,
                             IngredientRecipe, Follow,
                             Favorite, ShoppingList)
 from .serializers import (CustomUserSerializer, IngredientSerializer,
-                          TagSerializer, RecipeSerializer, FollowSerializer,
-                          SignupSerializer, TokenSerializer)
+                          TagSerializer, RecipeSerializer, FollowSerializer)
 from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
 
 
 User = get_user_model()
+
+
+class CustomUserViewSet(UserViewSet):
+    queryset = User.objects.all()
+    serializer_class = CustomUserSerializer
+
+    @action(
+        detail=True,
+        methods=['POST'],
+        permission_classes=(IsAuthenticated,)
+    )
+    def follow(self, request, **kwargs):
+        user = request.user
+        author_id = kwargs['id']
+        author_obj = get_object_or_404(User, id=author_id)
+        serializer = FollowSerializer(
+            instance=author_obj,
+            data=request.data,
+            context={'request': request}
+        )
+
+        if serializer.is_valid():
+            Follow.objects.create(
+                user=user, author_id=author_id
+            )
+            return Response(
+                serializer.data, status=status.HTTP_201_CREATED
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    @follow.mapping.delete
+    def delete_follow(self, request, **kwargs):
+        user = request.user
+        author_id = kwargs['id']
+
+        if get_object_or_404(
+            Follow,
+            user=user,
+            author_id=author_id
+        ).delete():
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    @action(
+        detail=False,
+        permission_classes=(IsAuthenticated,)
+    )
+    def followings(self, request):
+        followings_data = User.objects.filter(
+            following__user=request.user
+        )
+        page = self.paginate_queryset(followings_data)
+        serializer = FollowSerializer(
+            page,
+            many=True,
+            context={'request': request}
+        )
+        return self.get_paginated_response(serializer.data)
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
@@ -162,137 +225,3 @@ class RecipeViewSet(viewsets.ModelViewSet):
         response = HttpResponse(download_list, content_type='text/plain')
         response['Content-Disposition'] = f'attachment; filename={filename}'
         return response
-
-
-class CustomUserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = CustomUserSerializer
-    filter_backends = (SearchFilter,)
-    search_fields = ('username',)
-    lookup_field = 'username'
-
-    @action(
-        detail=False,
-        methods=('GET', 'PATCH'),
-        permission_classes=(IsAuthenticated,),
-    )
-    def me(self, request):
-        if request.method == 'GET':
-            serializer = self.get_serializer(request.user)
-            return Response(serializer.data)
-
-        serializer = self.get_serializer(
-            request.user, data=request.data, partial=True
-        )
-        serializer.is_valid(raise_exception=True)
-        if serializer.validated_data.get('role'):
-            serializer.validated_data['role'] = request.user.role
-        serializer.save()
-        return Response(serializer.data)
-
-    @action(
-        detail=True,
-        methods=['POST'],
-        permission_classes=(IsAuthenticated,)
-    )
-    def follow(self, request, **kwargs):
-        user = request.user
-        author_id = kwargs['id']
-        author_obj = get_object_or_404(User, id=author_id)
-        serializer = FollowSerializer(
-            instance=author_obj,
-            data=request.data,
-            context={'request': request}
-        )
-
-        if serializer.is_valid():
-            Follow.objects.create(
-                user=user, author_id=author_id
-            )
-            return Response(
-                serializer.data, status=status.HTTP_201_CREATED
-            )
-
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
-
-    @follow.mapping.delete
-    def delete_follow(self, request, **kwargs):
-        user = request.user
-        author_id = kwargs['id']
-
-        if get_object_or_404(
-            Follow,
-            user=user,
-            author_id=author_id
-        ).delete():
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-
-    @action(
-        detail=False,
-        permission_classes=(IsAuthenticated,)
-    )
-    def followings(self, request):
-        followings_data = User.objects.filter(
-            following__user=request.user
-        )
-        page = self.paginate_queryset(followings_data)
-        serializer = FollowSerializer(
-            page,
-            many=True,
-            context={'request': request}
-        )
-        return self.get_paginated_response(serializer.data)
-
-
-class SignupViewSet(CreateAPIView):
-    serializer_class = SignupSerializer
-    permission_classes = (AllowAny,)
-
-    def create(self, request):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        username = serializer.validated_data.get('username')
-        email = serializer.validated_data.get('email')
-        user, created = User.objects.get_or_create(
-            username=username, email=email
-        )
-        confirmation_code = default_token_generator.make_token(user)
-        send_mail(
-            subject='Your authentication code',
-            message='You will need it to get token\n'
-                    f'confirmation_code:\n{confirmation_code}\n'
-                    f'username: {username}',
-            from_email=settings.FROM_EMAIL,
-            recipient_list=(email,),
-            fail_silently=False,
-        )
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-class TokenViewSet(CreateAPIView):
-    serializer_class = TokenSerializer
-    permission_classes = (AllowAny,)
-
-    def create(self, request):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        username = serializer.validated_data.get('username')
-        user = get_object_or_404(User, username=username)
-        confirmation_code = request.data.get('confirmation_code')
-        if default_token_generator.check_token(user, confirmation_code):
-            user.is_active = True
-            user.save()
-            token = AccessToken.for_user(user)
-            return Response(
-                {'token': str(token)}, status=status.HTTP_201_CREATED
-            )
-        return Response(
-            {'confirmation_code:': 'Incorrect confirmation code'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
