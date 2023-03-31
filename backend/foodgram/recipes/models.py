@@ -91,7 +91,6 @@ class Recipe(models.Model):
     )
     tags = models.ManyToManyField(
         Tag,
-        related_name='recipes',
         verbose_name='Тег рецепта',
     )
     cooking_time = models.PositiveSmallIntegerField(
@@ -116,13 +115,13 @@ class IngredientRecipe(models.Model):
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
-        related_name='ingredients',
+        related_name='ingredient_recipe',
         verbose_name='Ингридиент',
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='recipes',
+        related_name='recipe_ingredient',
         verbose_name='Рецепт',
     )
     amount = models.PositiveSmallIntegerField(
@@ -140,17 +139,17 @@ class IngredientRecipe(models.Model):
                 f'{self.ingredient.measurement_unit}')
 
 
-class Follow(models.Model):
+class Subscription(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='follower',
+        related_name='subscriber',
         verbose_name='Подписчик'
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='following',
+        related_name='subscription',
         verbose_name='Автор'
     )
 
@@ -160,7 +159,7 @@ class Follow(models.Model):
         ordering = ('user',)
 
     def __str__(self):
-        return f'{self.user} подписан на {self.author}'
+        return f'{self.user} подписан на {self.author}.'
 
 
 class Favorite(models.Model):
@@ -178,15 +177,15 @@ class Favorite(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Рецепт'
-        verbose_name_plural = 'Рецепты'
+        verbose_name = 'Избранный рецепт'
+        verbose_name_plural = 'Избранные рецепты'
         ordering = ('user',)
 
     def __str__(self):
         return self.recipe
 
 
-class ShoppingList(models.Model):
+class ShoppingCart(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -202,8 +201,8 @@ class ShoppingList(models.Model):
 
     class Meta:
         verbose_name = 'Список покупок по рецепту'
-        verbose_name_plural = 'Списоки покупок по рецептам'
+        verbose_name_plural = 'Список покупок по рецептам'
         ordering = ['user']
 
     def __str__(self):
-        return f'Список покупок рецепта {self.recipe}'
+        return f'Список покупок рецепта {self.recipe}.'
