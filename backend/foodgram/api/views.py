@@ -1,14 +1,10 @@
-# from django.conf import settings
-# from django.contrib.auth.tokens import default_token_generator
-# from django.core.mail import send_mail
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
 from rest_framework import viewsets, status
-# from rest_framework.generics import CreateAPIView
-# from rest_framework.filters import SearchFilter
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -92,7 +88,6 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     pagination_class = None
-    # filterset_class = IngredientFilter
     permission_classes = (IsAuthorOrAdminOrReadOnly,)
 
 
@@ -106,8 +101,8 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeGetSerializer
-    # filter_backends = (DjangoFilterBackend,)
-    # filterset_class = RecipeFilter
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('tags', 'author')
     permission_classes = (IsAuthorOrAdminOrReadOnly,)
 
     def get_serializer_class(self):

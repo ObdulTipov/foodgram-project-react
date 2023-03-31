@@ -1,14 +1,9 @@
 import os
-from datetime import timedelta
 
-# from dotenv import load_dotenv
-
-# load_dotenv('../infra/.env')
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# SECRET_KEY = os.getenv(key='SECRET_KEY')
-SECRET_KEY = 'bq((=x4z3nr&)jqz=toa!33ig&66po^d8a-+k^z)(u!65l49r9'
+SECRET_KEY = os.path.join('../infra/.env', 'SECRET_KEY')
 
 DEBUG = True
 
@@ -38,7 +33,6 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
-        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 6,
@@ -48,19 +42,10 @@ REST_FRAMEWORK = {
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning',
 }
 
-SIMPLE_JWT = {
-   'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
-   'AUTH_HEADER_TYPES': ('Bearer',),
-}
-
-PERMISSIONS = {
-        'user': ['djoser.permissions.CurrentUserOrAdminOrReadOnly'],
-    }
-
 DJOSER = {
     'HIDE_USERS': False,
     'SERIALIZERS': {
-        'user': 'api.serializers.CustomUserSerializer',
+        'user': ['api.serializers.CustomUserSerializer'],
     },
     'PERMISSIONS': {
         'user': ['djoser.permissions.CurrentUserOrAdminOrReadOnly'],
