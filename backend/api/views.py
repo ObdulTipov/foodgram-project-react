@@ -4,19 +4,17 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from rest_framework import viewsets, status
+from recipes.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
+                            ShoppingCart, Subscription, Tag)
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from recipes.models import (Ingredient, Tag, Recipe,
-                            IngredientRecipe, Subscription,
-                            Favorite, ShoppingCart)
-from .serializers import (CustomUserSerializer, IngredientSerializer,
-                          TagSerializer, RecipeSerializer, RecipeGetSerializer,
-                          RecipePostSerializer, SubscribeSerializer)
 from .permissions import IsAuthorOrAdminOrReadOnly
-
+from .serializers import (CustomUserSerializer, IngredientSerializer,
+                          RecipeGetSerializer, RecipePostSerializer,
+                          RecipeSerializer, SubscribeSerializer, TagSerializer)
 
 User = get_user_model()
 

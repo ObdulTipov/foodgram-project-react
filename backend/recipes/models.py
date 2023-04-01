@@ -1,8 +1,6 @@
-from django.db import models
 from django.core.validators import MinValueValidator
-
+from django.db import models
 from users.models import User
-
 
 FIRST_TEXT_SYM = 15
 
