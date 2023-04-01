@@ -2,7 +2,7 @@ version: '3.3'
 services:
 
   frontend:
-    image: ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:latest
+    image: obdultipov/foodgram_frontend:latest
     volumes:
       - ../frontend/:/app/result_build/
 
@@ -14,7 +14,7 @@ services:
       - ./.env
 
   backend:
-    image: ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:latest
+    image: obdultipov/foodgram_backend:latest
     restart: always
     volumes:
       - static_value:/app/static/
