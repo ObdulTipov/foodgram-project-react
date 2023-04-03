@@ -1,7 +1,7 @@
 from colorfield.fields import ColorField
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.utils.html import mark_safe
+from django.utils.safestring import mark_safe
 from users.models import User
 
 FIRST_TEXT_SYM = 15
@@ -101,7 +101,7 @@ class Recipe(models.Model):
 
     def image_tag(self):
         return mark_safe('<img src="%s%s" width="150" height="50" />'
-                         % ('recipes/images/', self.image))
+                         % ('/images/', self.image))
 
     image_tag.short_description = 'Избражение'
 
@@ -130,7 +130,7 @@ class IngredientRecipe(models.Model):
         ordering = ('recipe',)
 
     def __str__(self):
-        return (f'{self.ingredient} - {self.amount} '
+        return (f'Рецепт "{self.recipe}": {self.ingredient} - {self.amount} '
                 f'{self.ingredient.measurement_unit}')
 
 

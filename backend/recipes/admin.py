@@ -15,12 +15,6 @@ class IngredientRecipeInline(admin.TabularInline):
     model = IngredientRecipe
     fields = ('ingredient', 'amount',)
 
-    def get_min_num(self, request, obj=None, **kwargs):
-        min_num = 0
-        if request.amount <= min_num:
-            return min_num + 1
-        return min_num
-
 
 class TagAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('name',)}
