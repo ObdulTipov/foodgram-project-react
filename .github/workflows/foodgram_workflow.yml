@@ -1,4 +1,4 @@
-name: Django-app workflow
+name: Foodgram-project-react workflow
 
 on: [push]
 
