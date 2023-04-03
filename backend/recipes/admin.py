@@ -15,9 +15,20 @@ class IngredientRecipeInline(admin.TabularInline):
     model = IngredientRecipe
     fields = ('ingredient', 'amount',)
 
+    def get_min_num(self, request, obj=None, **kwargs):
+        min_num = 0
+        if request.amount <= min_num:
+            return min_num + 1
+        return min_num
+
+
+class TagAdmin(admin.ModelAdmin):
+    prepopulated_fields = {'slug': ('name',)}
+
 
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'author',)
+    list_display = ('image_tag', 'name', 'author',)
+    readonly_fields = ('image_tag',)
     search_fields = ('author', 'name', 'tags',)
     list_filter = ('author', 'name', 'tags', 'pub_date')
     inlines = (IngredientRecipeInline,)
@@ -25,7 +36,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Ingredient, IngredientAdmin)
-admin.site.register(Tag)
+admin.site.register(Tag, TagAdmin)
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(IngredientRecipe)
 admin.site.register(Subscription)

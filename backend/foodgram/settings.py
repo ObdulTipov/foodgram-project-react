@@ -18,6 +18,7 @@ INSTALLED_APPS = [
     'api.apps.ApiConfig',
     'recipes.apps.RecipesConfig',
     'users.apps.UsersConfig',
+    'colorfield',
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',

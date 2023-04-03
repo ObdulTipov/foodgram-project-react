@@ -1,5 +1,7 @@
+from colorfield.fields import ColorField
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.utils.html import mark_safe
 from users.models import User
 
 FIRST_TEXT_SYM = 15
@@ -25,27 +27,15 @@ class Ingredient(models.Model):
 
 
 class Tag(models.Model):
-    COLOR_PALETTE = [
-        ('#A9A9A9', 'DarkGray'),
-        ('#FA8072', 'Salmon'),
-        ('#FFB6C1', 'LightPink'),
-        ('#FFA500', 'Orange'),
-        ('#FFD700', 'Gold'),
-        ('#D8BFD8', 'Thistle'),
-        ('#98FB98', 'PaleGreen'),
-        ('#AFEEEE', 'PaleTurquoise'),
-        ('#66CDAA', 'MediumAquamarine'),
-    ]
     name = models.TextField(
         verbose_name='Название',
         max_length=200,
         unique=True,
     )
-    color = models.CharField(
+    color = ColorField(
         verbose_name='Цвет',
-        max_length=7,
-        choices=COLOR_PALETTE,
         default='#A9A9A9',
+        format="hex",
     )
     slug = models.SlugField(
         max_length=200,
@@ -89,6 +79,7 @@ class Recipe(models.Model):
     )
     tags = models.ManyToManyField(
         Tag,
+        related_name='recipes',
         verbose_name='Тег рецепта',
     )
     cooking_time = models.PositiveSmallIntegerField(
@@ -107,6 +98,12 @@ class Recipe(models.Model):
 
     def __str__(self) -> str:
         return self.name[:FIRST_TEXT_SYM]
+
+    def image_tag(self):
+        return mark_safe('<img src="%s%s" width="150" height="50" />'
+                         % ('recipes/images/', self.image))
+
+    image_tag.short_description = 'Избражение'
 
 
 class IngredientRecipe(models.Model):
@@ -200,7 +197,7 @@ class ShoppingCart(models.Model):
     class Meta:
         verbose_name = 'Список покупок по рецепту'
         verbose_name_plural = 'Список покупок по рецептам'
-        ordering = ['user']
+        ordering = ('user',)
 
     def __str__(self):
-        return f'Список покупок рецепта {self.recipe}.'
+        return f'Пользователь - {self.user}, рецепт - {self.recipe}.'
