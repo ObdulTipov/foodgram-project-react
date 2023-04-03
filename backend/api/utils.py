@@ -1,9 +1,7 @@
 from django.shortcuts import get_object_or_404
+from recipes.models import Ingredient, IngredientRecipe, Recipe, Subscription
 from rest_framework import status
 from rest_framework.response import Response
-
-from recipes.models import (IngredientRecipe, Ingredient,
-                            Recipe, Subscription)
 
 
 def get_bool(self, model, obj):
