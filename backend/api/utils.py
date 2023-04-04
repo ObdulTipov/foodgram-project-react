@@ -67,9 +67,10 @@ def post_or_del_view(request, model, recipeserializer, **kwargs):
             data=request.data,
             context={'request': request}
         )
+        serializer.is_valid(raise_exception=True)
 
-        if serializer.is_valid() and model_obj.exists() is False:
-            model.objects.create(
+        if model_obj.exists() is False:
+            model.objects.get_or_create(
                 user=user, recipe_id=recipe_id
             )
             return Response(

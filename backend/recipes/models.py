@@ -101,7 +101,7 @@ class Recipe(models.Model):
 
     def image_tag(self):
         return mark_safe('<img src="%s%s" width="150" height="50" />'
-                         % ('/images/', self.image))
+                         % ('recipes/images/', self.image))
 
     image_tag.short_description = 'Избражение'
 

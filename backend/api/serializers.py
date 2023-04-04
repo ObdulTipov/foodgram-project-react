@@ -58,6 +58,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
+        read_only_fields = ('name', 'image', 'cooking_time')
 
 
 class RecipeGetSerializer(serializers.ModelSerializer):
@@ -166,7 +167,24 @@ class SubscribeSerializer(CustomUserSerializer):
     class Meta(CustomUserSerializer.Meta):
         fields = ('email', 'id', 'username', 'first_name',
                   'last_name', 'is_subscribed', 'recipes', 'recipes_count')
-        read_only_fields = ('email', 'username',)
+        read_only_fields = ('email', 'id', 'username', 'first_name',
+                            'last_name')
+
+    def validate(self, data):
+        user = self.context.get('request').user
+        author = self.instance
+
+        if user == author:
+            raise serializers.ValidationError(
+                'Подпишитесь на кого нибудь другого'
+            )
+        if Subscription.objects.filter(
+            user=user, author=author
+        ).exists():
+            raise serializers.ValidationError(
+                f'Вы уже подписаны на пользователя: {author}.'
+            )
+        return data
 
     def get_recipes(self, obj):
         recipes = Recipe.objects.filter(author=obj.id)
@@ -174,7 +192,7 @@ class SubscribeSerializer(CustomUserSerializer):
             data=recipes,
             many=True
         )
-        serializer.is_valid()
+        serializer.is_valid(raise_exception=True)
         return serializer.data
 
     def get_recipes_count(self, obj):

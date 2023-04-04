@@ -26,45 +26,41 @@ class CustomUserViewSet(UserViewSet):
 
     @action(
         detail=True,
-        methods=['POST'],
+        methods=['POST', 'DELETE'],
         permission_classes=(IsAuthenticated,)
     )
     def subscribe(self, request, **kwargs):
         user = request.user
-        author_id = kwargs['id']
-        author = get_object_or_404(User, id=author_id)
-        serializer = SubscribeSerializer(
-            instance=author,
-            data=request.data,
-            context={'request': request}
-        )
+        author = get_object_or_404(User, id=kwargs['id'])
 
-        if serializer.is_valid() and Subscription.objects.filter(
-            user=user, author=author
-        ).exists() is False and user != author:
-            Subscription.objects.create(
+        if request.method == 'POST':
+            serializer = SubscribeSerializer(
+                instance=author,
+                data=request.data,
+                context={'request': request}
+            )
+            serializer.is_valid(raise_exception=True)
+            Subscription.objects.get_or_create(
                 user=user, author=author
             )
             return Response(
                 serializer.data, status=status.HTTP_201_CREATED
             )
 
+        if request.method == 'DELETE':
+            subscribtion = Subscription.objects.filter(
+                user=user, author=author
+            )
+            if subscribtion.exists():
+                subscribtion.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
         return Response(
             serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
         )
-
-    @subscribe.mapping.delete
-    def delete_subscribe(self, request, **kwargs):
-        user = request.user
-        author_id = kwargs['id']
-        subscribe = Subscription.objects.filter(user=user, author_id=author_id)
-
-        if subscribe.exists():
-            subscribe.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-        return Response(status=status.HTTP_400_BAD_REQUEST)
 
     @action(
         detail=False,
