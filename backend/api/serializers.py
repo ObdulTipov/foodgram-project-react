@@ -161,6 +161,7 @@ class RecipePostSerializer(serializers.ModelSerializer):
 
 
 class SubscribeSerializer(CustomUserSerializer):
+    # email = serializers.EmailField(source='author.email', read_only=True)
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
