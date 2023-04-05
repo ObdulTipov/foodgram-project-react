@@ -159,6 +159,14 @@ class RecipePostSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
+    def to_representation(self, instance):
+        context = {'request': self.context.get('request')}
+        serializer = RecipeGetSerializer(
+            instance=instance,
+            context=context
+        )
+        return serializer.data
+
 
 class SubscriptionSerializer(serializers.ModelSerializer):
     user = CustomUserSerializer(read_only=True)
