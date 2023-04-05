@@ -107,9 +107,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return RecipePostSerializer
         return RecipeGetSerializer
 
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
-
     @action(
         detail=True,
         methods=['POST', 'DELETE'],
