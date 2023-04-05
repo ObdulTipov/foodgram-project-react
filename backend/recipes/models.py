@@ -38,6 +38,7 @@ class Tag(models.Model):
         format="hex",
     )
     slug = models.SlugField(
+        verbose_name='Slug',
         max_length=200,
         unique=True,
         blank=True,
@@ -101,7 +102,7 @@ class Recipe(models.Model):
 
     def image_tag(self):
         return mark_safe('<img src="%s%s" width="150" height="50" />'
-                         % ('recipes/images/', self.image))
+                         % ('/', self.image))
 
     image_tag.short_description = 'Избражение'
 

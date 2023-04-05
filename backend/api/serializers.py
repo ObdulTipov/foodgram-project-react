@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.db.models import F
+from django.db import models
 from djoser.serializers import UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from recipes.models import (Favorite, Ingredient, IngredientRecipe, Recipe,
@@ -80,7 +80,7 @@ class RecipeGetSerializer(serializers.ModelSerializer):
     def get_ingredients(self, obj):
         return obj.ingredients.values(
             'id', 'name', 'measurement_unit',
-            amount=F('ingredient_recipe__amount')
+            amount=models.F('ingredient_recipe__amount')
         )
 
     def get_is_favorited(self, obj):
@@ -92,7 +92,7 @@ class RecipeGetSerializer(serializers.ModelSerializer):
 
 class RecipePostSerializer(serializers.ModelSerializer):
     tags = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Tag.objects.all()
+        many=True, read_only=True
     )
     author = CustomUserSerializer(read_only=True)
     ingredients = IngredientRecipeSerializer(
@@ -160,8 +160,34 @@ class RecipePostSerializer(serializers.ModelSerializer):
         return instance
 
 
+class SubscriptionSerializer(serializers.ModelSerializer):
+    user = CustomUserSerializer(read_only=True)
+    author = CustomUserSerializer(read_only=True)
+
+    class Meta():
+        model = Subscription
+        fields = ('user', 'author')
+
+    def validate(self, data):
+        user = self.context.get('request').user
+        author = self.instance
+        print(user)
+        print(author)
+
+        if user == author:
+            raise serializers.ValidationError(
+                'Подпишитесь на кого нибудь другого'
+            )
+        if Subscription.objects.filter(
+            user=user, author=author
+        ).exists():
+            raise serializers.ValidationError(
+                f'Вы уже подписаны на пользователя: {author}.'
+            )
+        return data
+
+
 class SubscribeSerializer(CustomUserSerializer):
-    # email = serializers.EmailField(source='author.email', read_only=True)
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
@@ -174,6 +200,8 @@ class SubscribeSerializer(CustomUserSerializer):
     def validate(self, data):
         user = self.context.get('request').user
         author = self.instance
+        print(user)
+        print(author)
 
         if user == author:
             raise serializers.ValidationError(

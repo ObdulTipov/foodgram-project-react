@@ -11,10 +11,12 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from .filters import RecipeFilter
 from .permissions import IsAuthorOrAdminOrReadOnly
 from .serializers import (CustomUserSerializer, IngredientSerializer,
                           RecipeGetSerializer, RecipePostSerializer,
-                          RecipeSerializer, SubscribeSerializer, TagSerializer)
+                          RecipeSerializer, SubscribeSerializer,
+                          SubscriptionSerializer, TagSerializer)
 from .utils import post_or_del_view
 
 User = get_user_model()
@@ -71,7 +73,7 @@ class CustomUserViewSet(UserViewSet):
             following__user=request.user
         )
         page = self.paginate_queryset(subscriptions)
-        serializer = SubscribeSerializer(
+        serializer = SubscriptionSerializer(
             page,
             many=True,
             context={'request': request}
@@ -94,10 +96,10 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    queryset = Recipe.objects.all()
+    queryset = Recipe.objects.select_related('author').all()
     serializer_class = RecipeGetSerializer
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('tags', 'author')
+    filter_class = RecipeFilter
     permission_classes = (IsAuthorOrAdminOrReadOnly,)
 
     def get_serializer_class(self):
