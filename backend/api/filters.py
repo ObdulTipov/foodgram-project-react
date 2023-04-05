@@ -4,8 +4,9 @@ from recipes.models import Favorite, Recipe, ShoppingCart, Tag
 
 class RecipeFilter(filters.FilterSet):
     tags = filters.ModelMultipleChoiceFilter(
-        to_field_name='slug',
-        queryset=Tag.objects.all()
+        field_name='tags__slug',
+        queryset=Tag.objects.all(),
+        to_field_name='slug'
     )
     is_favorited = filters.BooleanFilter(
         method='filter_is_favorited'
@@ -33,7 +34,7 @@ class RecipeFilter(filters.FilterSet):
         user = self.request.user
 
         if ShoppingCart.objects.filter(user=user).exists():
-            return queryset.filter(shoppingcart_recipe__user=user)
+            return queryset.filter(shopping_recipe__user=user)
 
         return queryset.none()
 
