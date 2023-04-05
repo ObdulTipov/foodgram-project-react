@@ -15,8 +15,7 @@ from .filters import RecipeFilter
 from .permissions import IsAuthorOrAdminOrReadOnly
 from .serializers import (CustomUserSerializer, IngredientSerializer,
                           RecipeGetSerializer, RecipePostSerializer,
-                          RecipeSerializer, SubscribeSerializer,
-                          SubscriptionSerializer, TagSerializer)
+                          RecipeSerializer, SubscribeSerializer, TagSerializer)
 from .utils import post_or_del_view
 
 User = get_user_model()
@@ -73,7 +72,7 @@ class CustomUserViewSet(UserViewSet):
             subscription__user=request.user
         )
         page = self.paginate_queryset(subscriptions)
-        serializer = SubscriptionSerializer(
+        serializer = SubscribeSerializer(
             page,
             many=True,
             context={'request': request}
