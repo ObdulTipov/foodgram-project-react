@@ -33,6 +33,14 @@ class CustomUserViewSet(UserViewSet):
     def subscribe(self, request, **kwargs):
         user = request.user
         author = get_object_or_404(User, id=kwargs['id'])
+        data = {
+            'email': author.email,
+            'id': author.id,
+            'username': author.username,
+            'first_name': author.first_name,
+            'last_name': author.last_name,
+            # 'is_subscribed': author.is_subscribed,
+        }
 
         if request.method == 'POST':
             serializer = SubscribeSerializer(

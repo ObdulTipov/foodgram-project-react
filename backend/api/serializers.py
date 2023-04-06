@@ -157,48 +157,20 @@ class RecipePostSerializer(serializers.ModelSerializer):
         return instance
 
 
-class SubscriptionSerializer(serializers.ModelSerializer):
-    user = CustomUserSerializer(read_only=True)
-    author = CustomUserSerializer(read_only=True)
-
-    class Meta():
-        model = Subscription
-        fields = ('user', 'author')
-
-    def validate(self, data):
-        user = self.context.get('request').user
-        author = self.instance
-        print(user)
-        print(author)
-
-        if user == author:
-            raise serializers.ValidationError(
-                'Подпишитесь на кого нибудь другого'
-            )
-        if Subscription.objects.filter(
-            user=user, author=author
-        ).exists():
-            raise serializers.ValidationError(
-                f'Вы уже подписаны на пользователя: {author}.'
-            )
-        return data
-
-
 class SubscribeSerializer(CustomUserSerializer):
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
     class Meta(CustomUserSerializer.Meta):
-        fields = ('email', 'id', 'username', 'first_name',
-                  'last_name', 'is_subscribed', 'recipes', 'recipes_count')
+        fields = (
+            CustomUserSerializer.Meta.fields + ('recipes', 'recipes_count',)
+        )
         read_only_fields = ('email', 'id', 'username', 'first_name',
                             'last_name')
 
     def validate(self, data):
         user = self.context.get('request').user
         author = self.instance
-        print(user)
-        print(author)
 
         if user == author:
             raise serializers.ValidationError(
