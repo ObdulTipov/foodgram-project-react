@@ -9,14 +9,14 @@ def get_bool(self, model, obj):
 
     if model == Subscription:
         if model.objects.filter(
-            author_id=obj.id,
+            author=obj,
             user=user
         ).exists() and not user.is_anonymous:
             return True
         return False
 
     if model.objects.filter(
-        recipe_id=obj.id,
+        recipe=obj,
         user=user
     ).exists() and not user.is_anonymous:
         return True
@@ -49,16 +49,15 @@ def create_update_recipe(validated_data, author=None, instance=None):
 
 def post_or_del_view(request, model, recipeserializer, **kwargs):
     user = request.user
-    recipe_id = kwargs['pk']
-    recipe_obj = get_object_or_404(Recipe, pk=recipe_id)
+    recipe = get_object_or_404(Recipe, pk=kwargs['pk'])
     data = {
-        'id': recipe_id,
-        'name': recipe_obj.name,
-        'image': recipe_obj.image,
-        'cooking_time': recipe_obj.cooking_time,
+        'id': recipe.id,
+        'name': recipe.name,
+        'image': recipe.image,
+        'cooking_time': recipe.cooking_time,
     }
     model_obj = model.objects.filter(
-        user=user, recipe_id=recipe_id
+        user=user, recipe=recipe
     )
 
     if request.method == 'POST':
@@ -71,7 +70,7 @@ def post_or_del_view(request, model, recipeserializer, **kwargs):
 
         if model_obj.exists() is False:
             model.objects.get_or_create(
-                user=user, recipe_id=recipe_id
+                user=user, recipe=recipe
             )
             return Response(
                 serializer.data, status=status.HTTP_200_OK

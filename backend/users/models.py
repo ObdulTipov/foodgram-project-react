@@ -1,15 +1,15 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from .enums import Role
+
 
 class User(AbstractUser):
     REQUIRED_FIELDS = ('first_name', 'last_name', 'username',)
     USERNAME_FIELD = 'email'
-    USER = 'user'
-    ADMIN = 'admin'
     ROLES = [
-        (USER, USER),
-        (ADMIN, ADMIN),
+        ('user', Role.USER),
+        ('admin', Role.ADMIN),
     ]
 
     email = models.EmailField(
@@ -18,7 +18,7 @@ class User(AbstractUser):
     )
     role = models.CharField(
         max_length=20, choices=ROLES,
-        default=USER, verbose_name='Право достапа',
+        default='user', verbose_name='Право достапа',
     )
     bio = models.TextField(
         blank=True, verbose_name='Биография',

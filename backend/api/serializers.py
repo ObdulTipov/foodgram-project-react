@@ -162,11 +162,9 @@ class SubscribeSerializer(CustomUserSerializer):
     recipes_count = serializers.SerializerMethodField()
 
     class Meta(CustomUserSerializer.Meta):
-        fields = (
-            CustomUserSerializer.Meta.fields + ('recipes', 'recipes_count',)
-        )
-        read_only_fields = ('email', 'id', 'username', 'first_name',
-                            'last_name')
+        fields = ('email', 'id', 'username', 'first_name',
+                  'last_name', 'is_subscribed', 'recipes', 'recipes_count')
+        read_only_fields = ('email', 'username')
 
     def validate(self, data):
         user = self.context.get('request').user
@@ -185,12 +183,16 @@ class SubscribeSerializer(CustomUserSerializer):
         return data
 
     def get_recipes(self, obj):
-        recipes = Recipe.objects.filter(author=obj.id)
+        recipes = Recipe.objects.filter(author=obj)
+        request = self.context.get('request')
+        limit = request.GET.get('recipes_limit')
+        if limit:
+            recipes = recipes[:int(limit)]
         serializer = RecipeSerializer(
             data=recipes,
             many=True
         )
-        serializer.is_valid(raise_exception=True)
+        serializer.is_valid()
         return serializer.data
 
     def get_recipes_count(self, obj):
