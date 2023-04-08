@@ -1,4 +1,4 @@
-asgiref==3.2.10
+asgiref==3.5.2
 requests==2.26.0
 django==3.2.16
 django-filter==2.4.0
