@@ -4,6 +4,7 @@ django==2.2.16
 django-filter==2.4.0
 django-colorfield==0.8.0
 django-cors-headers
+django-extra-fields=3.0.2
 djangorestframework==3.12.4
 djangorestframework-simplejwt==4.8.0
 djoser==2.1.0

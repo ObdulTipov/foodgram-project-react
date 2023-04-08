@@ -10,6 +10,16 @@ Foodgram, «Продуктовый помощник». На этом серви�
 
 **http://62.84.125.111/**
 
+## Доступ к **http://62.84.125.111/admin/**
+
+# email
+
+* rewiwer@yandex.ru
+
+# password
+
+* reviwerpassword
+
 ## Ключевые технологии
 
 * Python
@@ -72,7 +82,7 @@ TELEGRAM_TOKEN=<токен вашего бота>
 sudo docker-compose exec -T backend python manage.py makemigrations
 sudo docker-compose exec -T backend python manage.py migrate
 sudo docker-compose exec -T backend python manage.py collectstatic --no-input
-sudo docker-compose exec -T backend python manage.py load_db --import_all
+sudo docker-compose exec -T backend python manage.py import_objects
 sudo docker-compose exec -T backend python manage.py createsuperuser
 ```
 
