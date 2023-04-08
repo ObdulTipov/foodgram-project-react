@@ -14,7 +14,7 @@ Foodgram, «Продуктовый помощник». На этом серви�
 
 ### email
 
-* rewiwer@yandex.ru
+* reviwer@yandex.ru
 
 ### password
 

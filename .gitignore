@@ -136,4 +136,4 @@ static/
 media/
 
 # Бэкап БД
-backend/fixtures.json
+/backend/fixtures.json
