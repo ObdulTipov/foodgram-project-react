@@ -60,7 +60,6 @@ coverage.xml
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
-fixtures.json
 
 # Flask stuff:
 instance/
@@ -137,4 +136,4 @@ static/
 media/
 
 # Бэкап БД
-/backend/fixtures.json
+backend/fixtures.json
