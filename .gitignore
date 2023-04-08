@@ -134,3 +134,6 @@ dmypy.json
 # папки со статикой и медиа
 static/
 media/
+
+# Бэкап БД
+backend/fixtures.json
