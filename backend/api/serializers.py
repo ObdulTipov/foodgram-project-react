@@ -51,6 +51,10 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
+    image = Base64ImageField(
+        required=False, allow_null=True, use_url=True
+    )
+
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
@@ -63,9 +67,6 @@ class RecipeGetSerializer(RecipeSerializer):
     ingredients = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
-    image = Base64ImageField(
-        required=False, allow_null=True
-    )
 
     class Meta(RecipeSerializer.Meta):
         model = Recipe
@@ -157,7 +158,7 @@ class RecipePostSerializer(serializers.ModelSerializer):
 
 
 class SubscribeSerializer(CustomUserSerializer):
-    recipes = serializers.SerializerMethodField()
+    recipes = RecipeSerializer(many=True, read_only=True)
     recipes_count = serializers.SerializerMethodField()
 
     class Meta(CustomUserSerializer.Meta):
@@ -180,22 +181,6 @@ class SubscribeSerializer(CustomUserSerializer):
                 f'Вы уже подписаны на пользователя: {author}.'
             )
         return data
-
-    def get_recipes(self, obj):
-        recipes = list(Recipe.objects.filter(author=obj).values(
-            'id', 'name', 'image', 'cooking_time'
-        ))
-        request = self.context.get('request')
-        limit = request.GET.get('recipes_limit')
-        if limit:
-            recipes = recipes[:int(limit)]
-        serializer = RecipeSerializer(
-            instance=recipes,
-            data=recipes,
-            many=True
-        )
-        serializer.is_valid(raise_exception=True)
-        return serializer.data
 
     def get_recipes_count(self, obj):
         return obj.recipes.count()
