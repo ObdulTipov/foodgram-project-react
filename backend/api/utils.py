@@ -7,18 +7,21 @@ from rest_framework.response import Response
 def get_bool(self, model, obj):
     user = self.context.get('request').user
 
+    if user.is_anonymous:
+        return False
+
     if model == Subscription:
         if model.objects.filter(
             author=obj,
             user=user
-        ).exists() and not user.is_anonymous:
+        ).exists():
             return True
         return False
 
     if model.objects.filter(
         recipe=obj,
         user=user
-    ).exists() and not user.is_anonymous:
+    ).exists():
         return True
     return False
 

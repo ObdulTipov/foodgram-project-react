@@ -51,14 +51,10 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    image = serializers.SerializerMethodField()
-
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
-
-    def get_image(self, obj):
-        return obj.get('image')
+        read_only_fields = ('name', 'image', 'cooking_time')
 
 
 class RecipeGetSerializer(RecipeSerializer):
@@ -67,7 +63,9 @@ class RecipeGetSerializer(RecipeSerializer):
     ingredients = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
-    image = Base64ImageField()
+    image = Base64ImageField(
+        required=False, allow_null=True
+    )
 
     class Meta(RecipeSerializer.Meta):
         model = Recipe
