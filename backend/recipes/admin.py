@@ -28,7 +28,7 @@ class RecipeAdmin(admin.ModelAdmin):
     list_display = ('image_tag', 'name', 'author', 'favorite_count')
     list_display_links = ('name',)
     readonly_fields = ('image_tag',)
-    search_fields = ('author', 'name', 'tags',)
+    search_fields = ('name',)
     list_filter = ('author', 'name', 'tags', 'pub_date')
     inlines = (IngredientRecipeInline,)
     empty_value_display = '-пусто-'
