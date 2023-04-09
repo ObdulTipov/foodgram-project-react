@@ -67,10 +67,8 @@ jobs:
         passphrase: ${{ secrets.PASSPHRASE }}
         script: |
           sudo docker-compose down
-          sudo docker image rm —force frontend
-          sudo docker image rm —force backend
-          sudo docker-compose rm frontend
-          sudo docker-compose rm backend
+          sudo docker-compose rm --force frontend
+          sudo docker-compose rm --force backend
           touch .env
           echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
           echo DB_NAME=${{ secrets.DB_NAME }} >> .env
