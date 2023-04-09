@@ -28,7 +28,7 @@ def get_bool(self, model, obj):
 
 def create_update_recipe(validated_data, author=None, instance=None):
     tags = validated_data.pop('tags')
-    ingredients = validated_data.pop('recipe_ingredient')
+    ingredients = validated_data.pop('ingredients')
 
     if instance is None:
         recipe = Recipe.objects.create(author=author, **validated_data)
