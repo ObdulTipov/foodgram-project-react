@@ -14,6 +14,7 @@ class IngredientAdmin(admin.ModelAdmin):
 class IngredientRecipeInline(admin.TabularInline):
     model = IngredientRecipe
     fields = ('ingredient', 'amount',)
+    extra = 1
 
     def get_min_num(self, request, obj=None, **kwargs):
         return 1
@@ -24,7 +25,8 @@ class TagAdmin(admin.ModelAdmin):
 
 
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('image_tag', 'name', 'author',)
+    list_display = ('image_tag', 'name', 'author', 'favorite_count')
+    list_display_links = ('name',)
     readonly_fields = ('image_tag',)
     search_fields = ('author', 'name', 'tags',)
     list_filter = ('author', 'name', 'tags', 'pub_date')

@@ -107,7 +107,11 @@ class Recipe(models.Model):
             % (f'{settings.MEDIA_URL}', self.image)
         )
 
+    def favorite_count(self):
+        return self.favorite_recipe.count()
+
     image_tag.short_description = 'Избражение'
+    favorite_count.short_description = 'Количество в избранном'
 
 
 class IngredientRecipe(models.Model):
