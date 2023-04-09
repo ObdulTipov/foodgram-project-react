@@ -1,4 +1,5 @@
 from colorfield.fields import ColorField
+from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.safestring import mark_safe
@@ -101,8 +102,10 @@ class Recipe(models.Model):
         return self.name[:FIRST_TEXT_SYM]
 
     def image_tag(self):
-        return mark_safe('<img src="%s%s" width="150" height="50" />'
-                         % ('/', self.image))
+        return mark_safe(
+            '<img src="%s%s" width="150" height="150" />'
+            % (f'{settings.MEDIA_URL}', self.image)
+        )
 
     image_tag.short_description = 'Избражение'
 
