@@ -67,8 +67,8 @@ jobs:
         passphrase: ${{ secrets.PASSPHRASE }}
         script: |
           sudo docker-compose down
-          sudo docker-compose rm --force frontend
-          sudo docker-compose rm --force backend
+          sudo docker-compose rm --force foodgram_frontend
+          sudo docker-compose rm --force foodgram_backend
           touch .env
           echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
           echo DB_NAME=${{ secrets.DB_NAME }} >> .env
