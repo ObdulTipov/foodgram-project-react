@@ -185,7 +185,7 @@ class Favorite(models.Model):
         ordering = ('user',)
 
     def __str__(self):
-        return self.recipe
+        return f'Пользователь: {self.user}, рецепт: {self.recipe}'
 
 
 class ShoppingCart(models.Model):
