@@ -26,7 +26,7 @@ class TagAdmin(admin.ModelAdmin):
 
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ('image_tag', 'name', 'author', 'favorite_count')
-    list_display_links = ('name',)
+    list_display_links = ('image_tag', 'name',)
     readonly_fields = ('image_tag',)
     search_fields = ('name',)
     list_filter = ('author', 'name', 'tags', 'pub_date')
