@@ -14,8 +14,8 @@ from rest_framework.response import Response
 from .filters import IngredientFilter, RecipeFilter
 from .permissions import IsAuthorOrAdminOrReadOnly
 from .serializers import (CustomUserSerializer, IngredientSerializer,
-                          RecipeGetSerializer, RecipePostSerializer,
-                          RecipeSerializer, SubscribeSerializer, TagSerializer)
+                          RecipeMiniSerializer, RecipeSerializer,
+                          SubscribeSerializer, TagSerializer)
 from .utils import post_or_del_view
 
 User = get_user_model()
@@ -100,15 +100,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         Recipe.objects.select_related('author')
         .prefetch_related('ingredients', 'tags')
     )
-    serializer_class = RecipeGetSerializer
+    serializer_class = RecipeSerializer
     filter_backends = (DjangoFilterBackend,)
     filter_class = RecipeFilter
     permission_classes = (IsAuthorOrAdminOrReadOnly,)
-
-    def get_serializer_class(self):
-        if self.action in ('create', 'partial_update'):
-            return RecipePostSerializer
-        return RecipeGetSerializer
 
     @action(
         detail=True,
@@ -117,7 +112,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def favorite(self, request, **kwargs):
         return post_or_del_view(
-            request, Favorite, RecipeSerializer, **kwargs
+            request, Favorite, RecipeMiniSerializer, **kwargs
         )
 
     @action(
@@ -127,7 +122,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def shopping_cart(self, request, **kwargs):
         return post_or_del_view(
-            request, ShoppingCart, RecipeSerializer, **kwargs
+            request, ShoppingCart, RecipeMiniSerializer, **kwargs
         )
 
     @action(

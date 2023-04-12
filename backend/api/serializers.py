@@ -48,7 +48,7 @@ class TagSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class RecipeSerializer(serializers.ModelSerializer):
+class RecipeMiniSerializer(serializers.ModelSerializer):
     image = Base64ImageField(
         required=False, allow_null=True, use_url=True
     )
@@ -59,14 +59,14 @@ class RecipeSerializer(serializers.ModelSerializer):
         read_only_fields = ('name', 'image', 'cooking_time')
 
 
-class RecipeGetSerializer(RecipeSerializer):
+class RecipeSerializer(RecipeMiniSerializer):
     tags = TagSerializer(many=True, read_only=True)
     author = CustomUserSerializer(read_only=True)
     ingredients = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
-    class Meta(RecipeSerializer.Meta):
+    class Meta(RecipeMiniSerializer.Meta):
         model = Recipe
         fields = ('id', 'tags', 'author', 'ingredients',
                   'is_favorited', 'is_in_shopping_cart',
@@ -84,13 +84,6 @@ class RecipeGetSerializer(RecipeSerializer):
     def get_is_in_shopping_cart(self, obj):
         return get_bool(self, ShoppingCart, obj)
 
-
-class RecipePostSerializer(RecipeGetSerializer):
-    class Meta(RecipeGetSerializer.Meta):
-        fields = ('id', 'tags', 'author', 'ingredients',
-                  'is_favorited', 'is_in_shopping_cart',
-                  'name', 'image', 'text', 'cooking_time')
-
     def validate(self, data):
         ingredients = self.initial_data.get('ingredients')
         tags = self.initial_data.get('tags')
@@ -104,7 +97,12 @@ class RecipePostSerializer(RecipeGetSerializer):
 
         ingredients_id = []
         for ingredient in ingredients:
-            if ingredient.get('id') in ingredients_id:
+            id = ingredient.get('id')
+            if not Ingredient.objects.filter(id=id).exists():
+                raise serializers.ValidationError(
+                    f'Ингредиента с id: {id}, нет.'
+                )
+            if id in ingredients_id:
                 raise serializers.ValidationError(
                     f'{ingredient} уже добавлен.'
                 )
@@ -112,12 +110,13 @@ class RecipePostSerializer(RecipeGetSerializer):
                 raise serializers.ValidationError(
                     'Введите количество ингредиента.'
                 )
-            ingredients_id.append(ingredient.get('id'))
+            ingredients_id.append(id)
 
         if len(tags) == 0:
             raise serializers.ValidationError(
                 'Выберите Теги.'
             )
+
         for tag in tags:
             if not Tag.objects.filter(id=tag).exists():
                 raise serializers.ValidationError(
@@ -162,7 +161,7 @@ class RecipePostSerializer(RecipeGetSerializer):
 
 
 class SubscribeSerializer(CustomUserSerializer):
-    recipes = RecipeSerializer(many=True, read_only=True)
+    recipes = RecipeMiniSerializer(many=True, read_only=True)
     recipes_count = serializers.SerializerMethodField()
 
     class Meta(CustomUserSerializer.Meta):
