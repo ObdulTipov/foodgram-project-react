@@ -103,7 +103,7 @@ class Recipe(models.Model):
 
     def image_tag(self):
         return mark_safe(
-            '<img src="%s%s" width="150" height="150" />'
+            '<img src="%s%s" style="max-height: 200px;" />'
             % (f'{settings.MEDIA_URL}', self.image)
         )
 
